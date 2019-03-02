@@ -1,5 +1,6 @@
 # /bin/sh
 DESTINATION=~/CANONO
+SOURCE="/Volumes/GoogleDrive/My Drive/buildo/PHOTOS/CANONO"
 LAST_RUN_FILE='.last-run'
 
 echo "Begin to sync photos"
@@ -21,11 +22,12 @@ LAST_MODIFIED_DATE_NO_SPACES=`stat -f "%Sm" -t "%Y%m%d%H%M" $LAST_MODIFIED_FILE`
 echo "Last modified File $LAST_MODIFIED_FILE"
 echo "Last modified Date $LAST_MODIFIED_DATE_READABLE"
 
-TMP=`find /Volumes/GoogleDrive/My\ Drive/buildo/PHOTOS/CANONO -newer $LAST_MODIFIED_FILE -type f -exec basename {} \;`
+# This works but preserve the folder structure inside the destination,
+# the photos are copied is /CANONO/Volumes/GoogleDrive/My Drive/buildo/PHOTOS/CANONO
+# sub optimal but it works  ¯\_(ツ)_/¯
+find "$SOURCE" -anewer $LAST_MODIFIED_FILE -type f ! -name '*Icon*' -print0 | rsync -vutp -0 --progress --files-from=- / $DESTINATION
 
 echo "Writing $LAST_RUN_FILE file"
-echo "Last sync:\t$NOW \nLast mod date:\t$LAST_MODIFIED_DATE_READABLE" > $DESTINATION/$LAST_RUN_FILE
+echo "Last sync:\t$NOW \nPrevious mod date:\t$LAST_MODIFIED_DATE_READABLE" > $DESTINATION/$LAST_RUN_FILE
 # modify date to not disturb the next run
 touch -t $LAST_MODIFIED_DATE_NO_SPACES $DESTINATION/$LAST_RUN_FILE
-
-echo $TMP
